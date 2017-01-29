@@ -9,5 +9,6 @@ HEIGHT = 224
 WIDTH= 224
 
 for imgFile in os.listdir('.'):
-    flipped = cv.imread(imgFile)
-    
+    image = cv.imread(imgFile)
+    flipped = image[:,:,::-1]
+    cv.imwrite(flipped, imgFile + '_reflect')
