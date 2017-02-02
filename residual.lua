@@ -23,6 +23,16 @@ end
 
 
 local function basicBlock()
-	model:add(SpatialConvolution(opt.inputDim, opt.inputDim, 3, 3, 1))
-
+	new = nn.Sequential()
+	new:add(SpatialConvolution(opt.inputDim, opt.inputDim, 3, 3, 1, 1)) -- no pad
+	new:add(BatchNorm(opt.inputDim))
+	new:add(ReLU())
+	new:add(SpatialConvolution(opt.inputDim, opt.inputDim, 3, 3, 1, 1))
+	new:add(BatchNorm(opt.inputDim))
+	
+	local shortCut = nn.Sequential()
+	shortCut:add(nn.ConcatTable():add(new):add(nn.Identity())) -- need to test if this way of adding residue works
+	shortCut:add(nn.CAddTable())
+	shortCut:add(ReLU)
+	return shortCut
 end
