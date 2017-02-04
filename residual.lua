@@ -20,16 +20,17 @@ local function firstBlock()
 	model:add(BatchNorm(64))
 	model:add(ReLU(true))
 	model:add(MaxPool(3, 3, 2, 2))
+	return model
 end
 
 
 local function basicBlock(inputDim, outputDim, stride)
 	local new = nn.Sequential()
 	new:add(SpatialConvolution(inputDim, outputDim, 3, 3, stride, stride, 1, 1)) -- no pad
-	new:add(BatchNorm(dim))
+	new:add(BatchNorm(outputDim))
 	new:add(ReLU(true))
 	new:add(SpatialConvolution(outputDim, outputDim, 3, 3, 1, 1, 1, 1))
-	new:add(BatchNorm(dim))
+	new:add(BatchNorm(outputDim))
 	
 	local shortCut = nn.Sequential()
 	shortCut:add(nn.ConcatTable():add(new):add(nn.Identity())) -- need to test if this way of adding residue works
@@ -39,8 +40,8 @@ local function basicBlock(inputDim, outputDim, stride)
 end
 
 
-local function makeModel() -- 18 layer model
-	local model = nn.Sequential()
+function makeModel() -- 18 layer model
+	model = nn.Sequential()
 
 	model:add(firstBlock()) -- 224*224 -> 112*112
 	model:add(basicBlock(3, 64, 1))
@@ -63,8 +64,9 @@ local function makeModel() -- 18 layer model
 	model:add(ReLU(true))
 	model:add(nn.Linear(120, 84))
 	model:add(nn.ReLU(true))
-	model:add(84, 10)
+	model:add(nn.Linear(84, 10)) -- 10 output classes
 	model:add(nn.LogSoftMax())
 	return model
 end
 
+return model
