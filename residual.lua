@@ -69,4 +69,3 @@ function makeModel() -- 18 layer model
 	return model
 end
 
-return model

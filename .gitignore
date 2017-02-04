@@ -2,6 +2,7 @@
 luac.out
 train/
 filesize.py
+images/
 # luarocks build files
 *.src.rock
 *.zip
