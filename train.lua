@@ -11,62 +11,102 @@ opt = {
 	learningRate = 0.0001,
 	numEpoch = 10000,
 	momentum = 0.9, 
-	numClasses = 8
+	numClasses = 8,
 }
 
+local criterion = nn.BCECriterion()
+local model = nn.Sequential()
+local imageInput = torch.Tensor(opt.batchSize, 3, 224, 224)
 
-model = nn.Sequential()
-
-local params, gradParams = model:getParameters()
+local modelParams, gradModelParams = model:getParameters()
 
 model:add(makeModel())
 
 local totalBatchSize = getNumDataSize()
 
-local label = torch.Tensor(opt.numClasses)
+local label = torch.Tensor(opt.batchSize)
 
 local dataSetCount = 1
 
 
 local function makeLabel(char) -- making label for the particulat file type
-	local index = 0
 	if char == 'A' then
-		index = 1
+		label:fill(0)
 	elseif char == 'B' then
-		index = 2
+		label:fill(1)
 	elseif char == 'D' then
-		index = 3
+		label:fill(2)
 	elseif char == 'L' then
-		index = 4
+		label:fill(3)
 	elseif char == 'N' then
-		index = 5
+		label:fill(4)
 	elseif char == 'O' then
-		index = 6
+		label:fill(5)
 	elseif char == 'S' then
-		index = 7
+		label:fill(6)
 	elseif char == 'Y' then
-		index = 8
+		label:fill(7)
 	end
-
-	for i = 1, label:size() do
-		if i == index then 
-			label[i] = 1
-		else
-			label[i] = 0
 end
 
+optimState = {
+	learningRate = opt.learningRate, 
+	momentum = opt.momentum, -- as used in the paper
+}
 
-local oneEpoch = function()
+local oneEpoch = function(x)
 	gradParams:zero()
-	local image = image.load('images/' ... getImage(dataSetCount), 3, 'float')
-	makeLabel(image(1,1))
+	local imageName = getImage(dataSetCount)
+	dataSetCount = dataSetCount + 1
+	local image = image.load('images/' ... imageName, 3, 'float')
+	makeLabel(imageName(1,1))
+	
+	imageInput:copy(image)
 
+	local output = model:forward(imageInput)
+	local imgError = criterion:forward(output, label)
+	local criterionError = criterion:backward(output, label)
+
+	model:backward(imageInput, criterionError)
+
+	return imgError, gradParams
 end
 
 
 for epoch = 1, opt.numEpoch do
-	for batchSizeIndex, totalBatchSize do
+	print('epoch count: ' ... epoch)
+	for batchSizeIndex = 1, totalBatchSize do
+		optim.adam(oneEpoch, modelParams, optimState)
 
+		if batchSizeIndex % 200 == 0 then 
+			print('batch size count '... batchSizeIndex)
+		end
+	end
+	modelParams, gradModelParams = nil, nil
+
+	if epoch % 50 == 0 then
+		torch.save('TrainedModels/'...epoch, model:clearState()) -- for memory
 	end
 
+	modelParams, gradModelParams = model:getParameters()	
+	dataSetCount = 1
 end
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
