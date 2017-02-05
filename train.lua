@@ -9,7 +9,7 @@ require 'data'
 opt = {
 	batchSize = 1, 
 	learningRate = 0.0001,
-	numEpoch = 10000,
+	numEpoch = 500,
 	momentum = 0.9, 
 	numClasses = 8,
 }
@@ -91,22 +91,3 @@ for epoch = 1, opt.numEpoch do
 	modelParams, gradModelParams = model:getParameters()	
 	dataSetCount = 1
 end
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
