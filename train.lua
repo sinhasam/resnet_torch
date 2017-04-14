@@ -3,7 +3,7 @@ require 'torch'
 require 'optim'
 require 'residual'
 require 'data'
-
+require 'image'
 -- learning rate and momentum parameter borrowed from the paper
 
 opt = {
@@ -28,23 +28,24 @@ local label = torch.Tensor(opt.batchSize)
 
 local dataSetCount = 1
 
+local params, gradParams = model:getParameters()
 
-local function makeLabel(char) -- making label for the particulat file type
-	if char == 'A' then
+local function makeLabel(firstLetter) -- making label for the particulat file type
+	if firstLetter == 'A' then
 		label:fill(0)
-	elseif char == 'B' then
+	elseif firstLetter == 'B' then
 		label:fill(1)
-	elseif char == 'D' then
+	elseif firstLetter == 'D' then
 		label:fill(2)
-	elseif char == 'L' then
+	elseif firstLetter == 'L' then
 		label:fill(3)
-	elseif char == 'N' then
+	elseif firstLetter == 'N' then
 		label:fill(4)
-	elseif char == 'O' then
+	elseif firstLetter == 'O' then
 		label:fill(5)
-	elseif char == 'S' then
+	elseif firstLetter == 'S' then
 		label:fill(6)
-	elseif char == 'Y' then
+	elseif firstLetter == 'Y' then
 		label:fill(7)
 	end
 end
@@ -58,10 +59,10 @@ local oneEpoch = function(x)
 	gradParams:zero()
 	local imageName = getImage(dataSetCount)
 	dataSetCount = dataSetCount + 1
-	local image = image.load('images/' ... imageName, 3, 'float')
-	makeLabel(imageName(1,1))
+	local img = image.load(('images/'..imageName), 3, 'float')
+	makeLabel(imageName:sub(1,1))
 	
-	imageInput:copy(image)
+	imageInput:copy(img)
 
 	local output = model:forward(imageInput)
 	local imgError = criterion:forward(output, label)
@@ -74,18 +75,18 @@ end
 
 
 for epoch = 1, opt.numEpoch do
-	print('epoch count: ' ... epoch)
+	print('epoch count: ' .. epoch)
 	for batchSizeIndex = 1, totalBatchSize do
 		optim.adam(oneEpoch, modelParams, optimState)
 
 		if batchSizeIndex % 200 == 0 then 
-			print('batch size count '... batchSizeIndex)
+			print('batch size count '.. batchSizeIndex)
 		end
 	end
 	modelParams, gradModelParams = nil, nil
 
 	if epoch % 50 == 0 then
-		torch.save('TrainedModels/'...epoch, model:clearState()) -- for memory
+		torch.save('TrainedModels/'..epoch, model:clearState()) -- for memory
 	end
 
 	modelParams, gradModelParams = model:getParameters()	
