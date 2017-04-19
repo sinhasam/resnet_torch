@@ -1,7 +1,7 @@
 import os
 import cv2 as cv
 
-os.chdir('train')
+os.chdir('images')
 
 countHeight = 0
 countWidth = 0
@@ -15,7 +15,7 @@ for imgFile in os.listdir('.'):
         totalCount += 1
         filename = str(imgFile)
         img = cv.imread(filename)
-        print(filename)
+        #print(filename)
         shape = img.shape
 
         if shape[0] > HEIGHT:

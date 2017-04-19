@@ -4,7 +4,7 @@ from skimage.measure import block_reduce
 import numpy as np
 
 
-os.chdir('train/')
+os.chdir('images/')
 
 HEIGHT = 224
 WIDTH = 224
@@ -13,8 +13,8 @@ for imgFile in os.listdir('.'):
     if imgFile.endswith('.jpg'):
         image = cv.imread(imgFile)
         newImg = block_reduce(image, block_size = (3,3,1), func = np.mean)
-        
-
+        shape = newImg.shape
+        #print(type(newImg))
         # there are no picture that are less than 224 after the downsampling 
         if shape[1] < WIDTH: 
             newImg = adjustWidth(newImg, shape[1], shape[0])
